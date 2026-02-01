@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              lower-case-service-id: true
+              enabled: false
+          routes:
+            - id: public-orders
+              uri: lb://order-service
+              predicates:
+                - Path=/api/v1/orders/**
+              filters:
+                - RewritePath=/api/v1/orders/(?<path>.*), /api/orders/$\{path}
+
+server:
+  port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka/     # ? ??? ??????? ?????? localhost

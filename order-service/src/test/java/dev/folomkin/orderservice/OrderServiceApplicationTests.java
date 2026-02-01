@@ -1,10 +1,10 @@
-package dev.folomkin.userservice;
+package dev.folomkin.orderservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserServiceApplicationTests {
+class OrderServiceApplicationTests {
 
     @Test
     void contextLoads() {

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: order-service     # ? ????? ?????!
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka
+server:
+  port: 8082

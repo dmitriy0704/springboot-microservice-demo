@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+
+  discovery:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    image: mycompany/discovery-service:latest
+    container_name: discovery
+    ports:
+      - "8761:8761"
+    hostname: discovery
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    image: mycompany/api-gateway:latest
+    container_name: gateway
+    ports:
+      - "8085:8080"           # или 8085:8080 — как тебе удобно
+    depends_on:
+      discovery:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+      - SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED=false   # если перешёл на ручные routes
+      - JAVA_OPTS=-Xms256m -Xmx768m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    image: mycompany/order-service:latest
+    container_name: order
+    ports:
+      - "8081:8080"           # маппинг внешний:внутренний
+    depends_on:
+      discovery:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+      - SERVER_PORT=8080
+      - SPRING_APPLICATION_NAME=order-service
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    restart: unless-stopped
+
+networks:
+  default:
+    name: microservices-net
