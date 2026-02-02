@@ -30,7 +30,7 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Порт (переопределяется в docker-compose)
-EXPOSE 8080
+EXPOSE 8085
 
 # Запуск с оптимизацией под контейнер
 ENTRYPOINT ["java", \
