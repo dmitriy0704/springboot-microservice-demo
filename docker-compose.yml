@@ -38,7 +38,7 @@ services:
       - SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED=false   # если перешёл на ручные routes
       - JAVA_OPTS=-Xms256m -Xmx768m
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,7 +52,7 @@ services:
     image: mycompany/order-service:latest
     container_name: order
     ports:
-      - "8081:8080"           # маппинг внешний:внутренний
+      - "8082:8080"           # маппинг внешний:внутренний
     depends_on:
       discovery:
         condition: service_healthy
