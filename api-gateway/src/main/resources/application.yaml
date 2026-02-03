@@ -10,7 +10,7 @@ spring:
               lower-case-service-id: true
               enabled: false
           routes:
-            - id: public-users-orders
+            - id: public-users
               uri: lb://user-service
               predicates:
                 - Path=/api/v1/users/**
@@ -31,11 +31,10 @@ spring:
               filters:
                 - RewritePath=/api/v1/orders/(?<path>.*), /api/orders/$\{path}
 
-
 server:
   port: 8085
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/     #  localhost -> discovery
+      defaultZone: http://discovery:8761/eureka/

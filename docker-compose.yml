@@ -45,23 +45,101 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+# ------- USER-SERVICE
+
+  user-service:
+      build:
+        context: ./user-service
+        dockerfile: Dockerfile
+      image: mycompany/user-service:latest
+      container_name: user-service
+      restart: unless-stopped
+      depends_on:
+        user-db:
+          condition: service_healthy
+      environment:
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/userdb
+        - SPRING_DATASOURCE_USERNAME=useruser
+        - SPRING_DATASOURCE_PASSWORD=userpass123
+        - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+        - SERVER_PORT=0
+        - EUREKA_INSTANCE_INSTANCE_ID=user-service:instance-1
+        - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+        - SPRING_APPLICATION_NAME=user-service
+        - JAVA_OPTS=-Xms256m -Xmx512m
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+        interval: 15s
+        timeout: 5s
+        retries: 4
+        start_period: 30s
+
+  user-db:
+      image: postgres:16-alpine
+      container_name: user-db
+      restart: unless-stopped
+      environment:
+        POSTGRES_USER: useruser
+        POSTGRES_PASSWORD: userpass123
+        POSTGRES_DB: userdb
+      ports:
+        - "54321:5432"          # внешний порт для удобства подключения из IDE
+      volumes:
+        - user-db-data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U useruser -d userdb"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+        start_period: 10s
+
+# -------- ORDER-SERVICE -----
+
   order-service:
     build:
       context: ./order-service
       dockerfile: Dockerfile
     image: mycompany/order-service:latest
-    container_name: order
-    ports:
-      - "8182:8182"           # маппинг внешний:внутренний
+    container_name: order-service
     depends_on:
       discovery:
         condition: service_healthy
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/orderdb
+      - SPRING_DATASOURCE_USERNAME=orderuser
+      - SPRING_DATASOURCE_PASSWORD=orderpass456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVER_PORT=0
+      - EUREKA_INSTANCE_INSTANCE_ID=order-service:instance-1
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
-      - SERVER_PORT=8182
       - SPRING_APPLICATION_NAME=order-service
       - JAVA_OPTS=-Xms256m -Xmx512m
     restart: unless-stopped
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: order-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass456
+      POSTGRES_DB: orderdb
+    ports:
+      - "54322:5432"          # другой внешний порт, чтобы не конфликтовать
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderuser -d orderdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  user-db-data:
+    name: user-db-data
+  order-db-data:
+    name: order-db-data
 
 networks:
   default:

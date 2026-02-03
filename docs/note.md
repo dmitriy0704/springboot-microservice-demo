@@ -66,3 +66,15 @@ q
 }
 
 ```
+
+# Для Docker:
+
+```shell
+docker compose build
+
+# Запустить
+docker compose up -d
+
+# Посмотреть логи
+docker compose logs -f
+```
