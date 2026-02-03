@@ -1,10 +1,10 @@
 spring:
   application:
-    name: order-service     # ? ????? ?????!
+    name: order-service
 
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery:8761/eureka
+      defaultZone: http://localhost:8761/eureka #http://discovery:8761/eureka
 server:
   port: 8182

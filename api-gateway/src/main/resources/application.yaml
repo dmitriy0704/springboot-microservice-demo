@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: api-gateway
   cloud:
     gateway:
       server:
@@ -8,6 +10,20 @@ spring:
               lower-case-service-id: true
               enabled: false
           routes:
+            - id: public-users-orders
+              uri: lb://user-service
+              predicates:
+                - Path=/api/v1/users/**
+              filters:
+                - RewritePath=/api/v1/users/(?<path>.*), /api/users/$\{path}
+
+#            - id: public-users-payments
+#              uri: lb://user-service
+#              predicates:
+#                - Path=/api/v1/users/payments/**
+#              filters:
+#                - RewritePath=/api/v1/users/payments/(?<path>.*), /api/user-payments/${path}
+
             - id: public-orders
               uri: lb://order-service
               predicates:
@@ -15,10 +31,11 @@ spring:
               filters:
                 - RewritePath=/api/v1/orders/(?<path>.*), /api/orders/$\{path}
 
+
 server:
   port: 8085
 
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery:8761/eureka/     # ? ??? ??????? ?????? localhost
+      defaultZone: http://localhost:8761/eureka/     #  localhost -> discovery
