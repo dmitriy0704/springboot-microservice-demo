@@ -1,8 +1,6 @@
 package dev.folomkin.orderservice.model.dto;
 
 import dev.folomkin.orderservice.model.entity.Order;
-import lombok.Value;
-
 /**
  * DTO for {@link Order}
  */

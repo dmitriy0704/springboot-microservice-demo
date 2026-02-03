@@ -57,7 +57,7 @@ public class UserPaymentsController {
         System.out.println("Реальный порт: " + port);
         return "hello from order-service on port " + port;
     }
-
+q   
     @GetMapping("/getlist")
     public String getUserPayments(){
         log.info("Handled by instance on port {}", port);

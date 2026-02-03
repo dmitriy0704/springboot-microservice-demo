@@ -1,5 +1,6 @@
 package dev.folomkin.userservice.controller;
 
+import dev.folomkin.userservice.service.UserOrdersService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,8 +9,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users/user-orders")
 public class UserOrdersController {
 
-    @GetMapping("/hellouser")
+    private final UserOrdersService userOrdersService;
+
+    public UserOrdersController(UserOrdersService userOrdersService) {
+        this.userOrdersService = userOrdersService;
+    }
+
+
+    @GetMapping("/hello")
     public String getUser(){
-        return "Get user hello";
+        return userOrdersService.callOrderService();
     }
 }

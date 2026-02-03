@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    @GetMapping("/gethello")
+    @GetMapping("/hello")
     public String hello() {
         return "Hello from Order Service!";
     }
