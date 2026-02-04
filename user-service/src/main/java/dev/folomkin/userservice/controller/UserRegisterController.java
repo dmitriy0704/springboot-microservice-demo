@@ -61,7 +61,7 @@ public class UserRegisterController {
         return repository.save(user);
     }
 
-    
+
     private void applyUpdates(UserEntity user, UpdateUserProfileDto dto) {
         if (dto.getName() != null) {
             user.setName(dto.getName());
