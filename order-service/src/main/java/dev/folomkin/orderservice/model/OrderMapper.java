@@ -5,9 +5,9 @@ import dev.folomkin.orderservice.model.entity.Order;
 
 public class OrderMapper {
 
-    public static Order toEntity(OrderDto dto) {
+    public static Order toEntity(String userId, OrderDto dto) {
         return new Order(
-                1L,
+                userId,
                 dto.getName(),
                 dto.getAmount()
         );

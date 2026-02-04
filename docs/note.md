@@ -69,6 +69,8 @@ q
 
 # Для Docker:
 
+## Запуск
+
 ```shell
 docker compose build
 
@@ -78,3 +80,14 @@ docker compose up -d
 # Посмотреть логи
 docker compose logs -f
 ```
+
+
+# Настройка Keycloak
+
+Настройка Keycloak:
+
+1. Созадть realm (Realm Setting: User registration +, Verify email +)
+2. Создать Client(
+    Standard flow +,
+    Direct access grants +)
+3. Создать User(Email verified +, заполнить General)

@@ -1,6 +1,11 @@
 spring:
   application:
     name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/microservices
   cloud:
     gateway:
       server:
@@ -30,6 +35,7 @@ spring:
                 - Path=/api/v1/orders/**
               filters:
                 - RewritePath=/api/v1/orders/(?<path>.*), /api/orders/$\{path}
+#                - TokenRelay
 
 server:
   port: 8085

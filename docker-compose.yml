@@ -1,7 +1,40 @@
 version: '3.9'
 
 services:
-
+  keycloak_db:
+    image: postgres:16-alpine
+    container_name: keycloak_db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5  
+  keycloak:
+      image: quay.io/keycloak/keycloak:26.5.2
+      container_name: keycloak
+      command: start-dev
+      environment:
+        # Настройки БД
+        KC_DB: postgres
+        KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak
+        KC_DB_USERNAME: keycloak
+        KC_DB_PASSWORD: password
+        # Админ панель
+        KC_BOOTSTRAP_ADMIN_USERNAME: admin
+        KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+        # Важно для работы с localhost в разработке
+        KC_HOSTNAME_STRICT: "false"
+        KC_HTTP_ENABLED: "true"
+      ports:
+        - "8080:8080"
+      depends_on:
+        keycloak_db:
+          condition: service_healthy
+    
   discovery:
     build:
       context: ./discovery-service
@@ -37,6 +70,7 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
       - SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED=false   # если перешёл на ручные routes
       - JAVA_OPTS=-Xms256m -Xmx768m
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/realms/microservices
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 10s
