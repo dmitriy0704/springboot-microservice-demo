@@ -89,6 +89,8 @@ services:
       container_name: user-service
       restart: unless-stopped
       depends_on:
+        discovery:
+          condition: service_healthy
         user-db:
           condition: service_healthy
       environment:
@@ -138,6 +140,8 @@ services:
     depends_on:
       discovery:
         condition: service_healthy
+      order-db:
+          condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/orderdb
       - SPRING_DATASOURCE_USERNAME=orderuser
@@ -149,6 +153,12 @@ services:
       - SPRING_APPLICATION_NAME=order-service
       - JAVA_OPTS=-Xms256m -Xmx512m
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]   # или /health, если actuator не включён
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s     # даём время на старт и миграции
 
   order-db:
     image: postgres:16-alpine
@@ -169,11 +179,133 @@ services:
       retries: 5
       start_period: 10s
 
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    image: mycompany/payment-service:latest
+    container_name: payment-service
+    depends_on:
+      discovery:
+        condition: service_healthy
+      payment-db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/paymentdb
+      - SPRING_DATASOURCE_USERNAME=paymentuser
+      - SPRING_DATASOURCE_PASSWORD=paymentpass456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVER_PORT=0
+      - EUREKA_INSTANCE_INSTANCE_ID=payment-service:instance-1
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+      - SPRING_APPLICATION_NAME=payment-service
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]   # или /health, если actuator не включён
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  
+
+  payment-db:
+    image: postgres:16-alpine
+    container_name: payment-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: paymentuser
+      POSTGRES_PASSWORD: paymentpass456
+      POSTGRES_DB: paymentdb
+    ports:
+      - "54323:5432"          # другой внешний порт, чтобы не конфликтовать
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paymentuser -d paymentdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  kafka-broker:
+    image: bitnamilegacy/kafka:3.6
+    container_name: kafka-broker
+    ports:
+      - "9092:9092"
+    environment:
+      # 1. Настройка ролей: этот контейнер и брокер, и контроллер
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      # 2. Описание портов (слушателей)
+      # 9092 - для IDEA (localhost), 29092 - для Docker-сети, 9093 - внутренний для KRaft
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,EXTERNAL://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-broker:29092,EXTERNAL://localhost:9092 # или localhost
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # 3. Настройка KRaft контроллера
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-broker:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      # 4. Безопасность и кластер
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LOG_DIRS=/bitnami/kafka/logs
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+      # - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
+    volumes:
+      - kafka_data:/bitnami/kafka
+
+
+
+  # kafka:
+    # image: confluentinc/cp-kafka:7.6.0
+    # container_name: kafka
+    # hostname: kafka
+    # ports:
+      # - "9092:9092"
+    # environment:
+      # === KRaft mode ===
+      # KAFKA_NODE_ID: 1
+      # KAFKA_PROCESS_ROLES: controller,broker
+      # === Listeners ===
+      # KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      # === Controller quorum ===
+      # KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      # === Internal topics ===
+      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      # KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # === Log dirs ===
+      # KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # === Dev settings ===
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:0.3.2
+    container_name: kafka-ui
+    ports:
+      - "8089:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092   # ← измени на 29092!
+      # KAFKA_BROKERCONNECT: kafka-broker:9092   ← удали, это устаревшая переменная, не нужна
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    # depends_on:
+    #   kafka-broker:
+    #     condition: service_healthy   # добавь, если у kafka есть healthcheck
+
 volumes:
   user-db-data:
     name: user-db-data
   order-db-data:
     name: order-db-data
+  payment-db-data:
+    name: payment-db-data
+  kafka_data:
+
 
 networks:
   default:

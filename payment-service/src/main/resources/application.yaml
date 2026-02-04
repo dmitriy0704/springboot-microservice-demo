@@ -1,3 +1,30 @@
 spring:
   application:
     name: payment-service
+  datasource:
+    url: jdbc:postgresql://payment-db:5432/paymentdb # можно тут не писать, если есть в docker-compose
+    username: paymentuser # можно тут не писать, если есть в docker-compose
+    password: paymentpass456 # можно тут не писать, если есть в docker-compose
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update          # или validate / none в продакшене
+    show-sql: true              # опционально, для отладки
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+server:
+  port: ${SERVER_PORT:0}
+
+eureka:
+  instance:
+    instance-id: $${spring.application.name}:${random.uuid}
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka
+logging:
+  level:
+    org.springframework.security: TRACE   # или DEBUG
+    org.springframework.web: DEBUG
