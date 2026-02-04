@@ -253,36 +253,6 @@ services:
     volumes:
       - kafka_data:/bitnami/kafka
 
-
-
-  # kafka:
-    # image: confluentinc/cp-kafka:7.6.0
-    # container_name: kafka
-    # hostname: kafka
-    # ports:
-      # - "9092:9092"
-    # environment:
-      # === KRaft mode ===
-      # KAFKA_NODE_ID: 1
-      # KAFKA_PROCESS_ROLES: controller,broker
-      # === Listeners ===
-      # KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
-      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      # KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      # === Controller quorum ===
-      # KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      # === Internal topics ===
-      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      # KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      # === Log dirs ===
-      # KAFKA_LOG_DIRS: /var/lib/kafka/data
-      # === Dev settings ===
-      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      # CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-
   kafka-ui:
     image: provectuslabs/kafka-ui:0.3.2
     container_name: kafka-ui
