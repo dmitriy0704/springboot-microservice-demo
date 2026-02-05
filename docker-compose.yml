@@ -239,7 +239,7 @@ services:
       # 2. Описание портов (слушателей)
       # 9092 - для IDEA (localhost), 29092 - для Docker-сети, 9093 - внутренний для KRaft
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,EXTERNAL://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-broker:29092,EXTERNAL://localhost:9092 # или localhost
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-broker:29092,EXTERNAL://localhost:9092
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       # 3. Настройка KRaft контроллера
@@ -260,8 +260,7 @@ services:
       - "8089:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092   # ← измени на 29092!
-      # KAFKA_BROKERCONNECT: kafka-broker:9092   ← удали, это устаревшая переменная, не нужна
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092
       DYNAMIC_CONFIG_ENABLED: 'true'
     # depends_on:
     #   kafka-broker:

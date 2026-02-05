@@ -3,6 +3,7 @@ package dev.folomkin.orderservice.model.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -16,13 +17,13 @@ public class Order {
 
     private String name;
 
-    private int amount;
-    
+    private BigDecimal amount;
+
 
     public Order() {
     }
 
-    public Order(String userid, String name, int amount) {
+    public Order(String userid, String name, BigDecimal amount) {
         this.userid = userid;
         this.name = name;
         this.amount = amount;
@@ -35,8 +36,7 @@ public class Order {
     public void setId(UUID id) {
         this.id = id;
     }
-
-
+    
     public String getUserid() {
         return userid;
     }
@@ -53,11 +53,11 @@ public class Order {
         this.name = name;
     }
 
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 }

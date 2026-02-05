@@ -22,20 +22,19 @@ spring:
               filters:
                 - RewritePath=/api/v1/users/(?<path>.*), /api/users/$\{path}
 
-#            - id: public-users-payments
-#              uri: lb://user-service
-#              predicates:
-#                - Path=/api/v1/users/payments/**
-#              filters:
-#                - RewritePath=/api/v1/users/payments/(?<path>.*), /api/user-payments/${path}
-
             - id: public-orders
               uri: lb://order-service
               predicates:
                 - Path=/api/v1/orders/**
               filters:
                 - RewritePath=/api/v1/orders/(?<path>.*), /api/orders/$\{path}
-#                - TokenRelay
+
+            - id: public-payments
+              uri: lb://payment-service
+              predicates:
+                - Path=/api/v1/payments/**
+              filters:
+                - RewritePath=/api/v1/payments/(?<path>.*), /api/payments/$\{path}
 
 server:
   port: 8085

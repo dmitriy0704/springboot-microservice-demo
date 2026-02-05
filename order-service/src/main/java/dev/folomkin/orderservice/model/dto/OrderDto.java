@@ -1,14 +1,17 @@
 package dev.folomkin.orderservice.model.dto;
 
 import dev.folomkin.orderservice.model.entity.Order;
+
+import java.math.BigDecimal;
+
 /**
  * DTO for {@link Order}
  */
 public class OrderDto {
     private String name;
-    private int amount;
+    private BigDecimal amount;
 
-    public OrderDto(String name, int amount) {
+    public OrderDto(String name, BigDecimal amount) {
         this.name = name;
         this.amount = amount;
     }
@@ -24,11 +27,11 @@ public class OrderDto {
         this.name = name;
     }
 
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 }

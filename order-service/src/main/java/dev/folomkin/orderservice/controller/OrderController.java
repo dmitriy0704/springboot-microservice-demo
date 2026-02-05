@@ -1,8 +1,14 @@
 package dev.folomkin.orderservice.controller;
 
+import dev.folomkin.orderservice.kafka.OrderCreatedEvent;
+import dev.folomkin.orderservice.kafka.OrderEventPublisher;
 import dev.folomkin.orderservice.model.dto.OrderDto;
 import dev.folomkin.orderservice.model.entity.Order;
 import dev.folomkin.orderservice.service.OrderService;
+import jakarta.servlet.http.PushBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -11,16 +17,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderEventPublisher publisher;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderEventPublisher publisher) {
         this.orderService = orderService;
+        this.publisher = publisher;
     }
 
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
     @GetMapping("/hello")
     public String hello() {
@@ -28,26 +38,32 @@ public class OrderController {
     }
 
     @PostMapping("/create-order")
-    public ResponseEntity<Order> create(@AuthenticationPrincipal Jwt jwt, @RequestBody OrderDto orderDto) {
+    public ResponseEntity<Order> create(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody OrderDto orderDto) {
         String userId = jwt.getSubject(); // sub
-        System.out.println(jwt.getClaims());
-        return ResponseEntity.ok().body(orderService.createOrder(userId, orderDto));
+
+        log.debug("NEW PAYMENT: {}", jwt.getClaims());
+
+        Order order = orderService.createOrder(userId, orderDto);
+
+        publisher.publish(
+                new OrderCreatedEvent(
+                        order.getId(),
+                        userId,
+                        order.getName(),
+                        order.getAmount()
+                )
+        );
+
+        return ResponseEntity.ok().body(order);
     }
 
 
     @GetMapping("/all-orders")
-    public ResponseEntity<List<Order>> allOrders(){
+    public ResponseEntity<List<Order>> allOrders() {
         return ResponseEntity.ok().body(orderService.allOrders());
     }
 
 
-//    @PostMapping("/create")
-//    @PreAuthorize("isAuthenticated()")
-//    public ResponseEntity<Order> createOrder(@RequestBody OrderDto orderDto, Principal principal) {
-//        String userId = principal.getName(); // Из JWT
-//        UserInfo userInfo = userClient.getUserById(userId); // Feign call to user-service
-//        Order order = new Order(orderDto, userId, userInfo.getAddress());
-//        orderRepository.save(order);
-//        return ResponseEntity.ok(order);
-//    }
 }
