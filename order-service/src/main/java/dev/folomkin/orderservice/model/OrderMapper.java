@@ -2,6 +2,7 @@ package dev.folomkin.orderservice.model;
 
 import dev.folomkin.orderservice.model.dto.OrderDto;
 import dev.folomkin.orderservice.model.entity.Order;
+import dev.folomkin.orderservice.model.entity.OrderStatus;
 
 public class OrderMapper {
 
@@ -9,6 +10,7 @@ public class OrderMapper {
         return new Order(
                 userId,
                 dto.getName(),
+                OrderStatus.CREATED,
                 dto.getAmount()
         );
     }

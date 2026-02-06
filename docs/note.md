@@ -86,11 +86,15 @@ docker compose logs -f
 
 Настройка Keycloak:
 
-1. Созадть realm (Realm Setting: User registration +, Verify email +)
+1. Созадть realm (Realm Setting: User registration +, Verify email +, Frontend URL§ http://keycloak:8080)
 2. Создать Client(
     Standard flow +,
     Direct access grants +)
 3. Создать User(Email verified +, заполнить General)
+
+
+
+
 
 # Регистрция пользователя из фронта.
 

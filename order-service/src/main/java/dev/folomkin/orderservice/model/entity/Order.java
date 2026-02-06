@@ -19,13 +19,16 @@ public class Order {
 
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     public Order() {
     }
 
-    public Order(String userid, String name, BigDecimal amount) {
+    public Order(String userid, String name, OrderStatus status, BigDecimal amount) {
         this.userid = userid;
         this.name = name;
+        this.status = status;
         this.amount = amount;
     }
 
@@ -36,7 +39,7 @@ public class Order {
     public void setId(UUID id) {
         this.id = id;
     }
-    
+
     public String getUserid() {
         return userid;
     }
@@ -59,5 +62,17 @@ public class Order {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public void markAsPaid() {
+        this.status = OrderStatus.PAID;
     }
 }

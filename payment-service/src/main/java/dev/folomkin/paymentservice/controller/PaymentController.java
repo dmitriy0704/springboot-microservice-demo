@@ -30,10 +30,15 @@ public class PaymentController {
         return ResponseEntity.ok().body(service.findAllPayments());
     }
 
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Payment> updatePaymentStatus(
-            @PathVariable UUID id, UpdateStatusDto statusDto) {
-        Payment payment = service.updatePaymentStatus(id, statusDto.status());
-        return ResponseEntity.ok().body(payment);
+    @PostMapping("/{paymentId}/complete")
+    public void complete(@PathVariable UUID paymentId) {
+        service.completePayment(paymentId);
+    }
+
+
+    @DeleteMapping("/{paymentId}")
+    public ResponseEntity<?> deletePayment(@PathVariable("paymentId") UUID paymentId){
+        service.deletePayment(paymentId);
+        return ResponseEntity.ok().body("Платеж удален");
     }
 }

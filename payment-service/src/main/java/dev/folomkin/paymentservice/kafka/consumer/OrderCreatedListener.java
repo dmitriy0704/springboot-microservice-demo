@@ -1,4 +1,4 @@
-package dev.folomkin.paymentservice.kafka;
+package dev.folomkin.paymentservice.kafka.consumer;
 
 import dev.folomkin.paymentservice.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;

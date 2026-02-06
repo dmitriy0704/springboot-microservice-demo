@@ -1,4 +1,4 @@
-package dev.folomkin.paymentservice.kafka;
+package dev.folomkin.paymentservice.kafka.producer;
 
 
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,16 +13,10 @@ public class PaymentEventPublisher {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-
     public void publish(PaymentCompletedEvent event) {
         kafkaTemplate.send(
                 "payment.completed",
-                new PaymentCompletedEvent(
-                        payment.getId(),
-                        payment.getOrderId(),
-                        payment.getUserId(),
-                        payment.getAmount()
-                )
+                event
         );
     }
 }

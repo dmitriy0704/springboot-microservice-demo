@@ -16,16 +16,22 @@ spring:
         format_sql: true
   kafka:
     bootstrap-servers: kafka-broker:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       group-id: payment-service
+      enable-auto-commit: false
       auto-offset-reset: earliest
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-    properties:
-      spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
-      spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
-      spring.json.trusted.packages: "*"
-      spring.json.value.default.type: dev.folomkin.paymentservice.kafka.OrderCreatedEvent
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.add.type.headers: false
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: dev.folomkin.paymentservice.kafka.consumer.OrderCreatedEvent
 
 server:
   port: ${SERVER_PORT:0}

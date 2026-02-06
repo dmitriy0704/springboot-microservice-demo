@@ -1,12 +1,11 @@
 package dev.folomkin.orderservice.controller;
 
-import dev.folomkin.orderservice.kafka.OrderCreatedEvent;
-import dev.folomkin.orderservice.kafka.OrderEventPublisher;
+import dev.folomkin.orderservice.kafka.producer.OrderCreatedEvent;
+import dev.folomkin.orderservice.kafka.producer.OrderEventPublisher;
 import dev.folomkin.orderservice.model.dto.OrderDto;
 import dev.folomkin.orderservice.model.entity.Order;
+import dev.folomkin.orderservice.model.entity.OrderStatus;
 import dev.folomkin.orderservice.service.OrderService;
-import jakarta.servlet.http.PushBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +51,7 @@ public class OrderController {
                         order.getId(),
                         userId,
                         order.getName(),
+                        OrderStatus.CREATED,
                         order.getAmount()
                 )
         );
@@ -65,5 +65,11 @@ public class OrderController {
         return ResponseEntity.ok().body(orderService.allOrders());
     }
 
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<?> deleteOrder(@PathVariable("orderId") UUID orderId) {
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.ok().body("Заказ удален");
+    }
 
 }

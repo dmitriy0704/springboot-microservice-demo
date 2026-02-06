@@ -1,4 +1,4 @@
-package dev.folomkin.orderservice.kafka;
+package dev.folomkin.paymentservice.kafka.producer;
 
 
 import org.springframework.context.annotation.Bean;
@@ -10,8 +10,8 @@ import org.springframework.kafka.core.ProducerFactory;
 public class KafkaProducerConfig {
 
     @Bean
-    public KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate(
-            ProducerFactory<String, OrderCreatedEvent> factory) {
+    public KafkaTemplate<String, PaymentCompletedEvent> kafkaTemplate(
+            ProducerFactory<String, PaymentCompletedEvent> factory) {
         return new KafkaTemplate<>(factory);
     }
 }
