@@ -1,7 +1,5 @@
 package dev.folomkin.userservice.controller;
 
-import dev.folomkin.userservice.model.dto.CreateUserRequest;
-import dev.folomkin.userservice.model.dto.CreateUserResponse;
 import dev.folomkin.userservice.model.dto.UpdateUserProfileDto;
 import dev.folomkin.userservice.model.entity.UserEntity;
 import dev.folomkin.userservice.repository.UserRepository;
