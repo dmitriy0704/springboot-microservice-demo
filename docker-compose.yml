@@ -11,6 +11,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5  
+    networks:
+        - microservices-net  
   keycloak:
       image: quay.io/keycloak/keycloak:26.5.2
       container_name: keycloak
@@ -32,6 +34,8 @@ services:
       depends_on:
         keycloak_db:
           condition: service_healthy
+      networks:
+        - microservices-net
     
   discovery:
     build:
@@ -52,6 +56,8 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
+    networks:
+      - microservices-net
 
   api-gateway:
     build:
@@ -76,6 +82,9 @@ services:
       retries: 5
       start_period: 20s
     restart: unless-stopped
+    networks:
+        - microservices-net
+    
 
 # ------- USER-SERVICE
 
@@ -107,6 +116,10 @@ services:
         timeout: 5s
         retries: 4
         start_period: 30s
+      labels:
+        - "logging=promtail"
+      networks:
+        - microservices-net
 
   user-db:
       image: postgres:16-alpine
@@ -126,6 +139,8 @@ services:
         timeout: 5s
         retries: 5
         start_period: 10s
+      networks:
+        - microservices-net
 
 # -------- ORDER-SERVICE -----
 
@@ -159,6 +174,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s     # даём время на старт и миграции
+    labels:
+      - "logging=promtail"
+    networks:
+      - microservices-net
 
   order-db:
     image: postgres:16-alpine
@@ -178,6 +197,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+        - microservices-net
 
   payment-service:
     build:
@@ -208,7 +229,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s  
+      start_period: 30s
+    labels:
+      - "logging=promtail"
+    networks:
+      - microservices-net
 
   payment-db:
     image: postgres:16-alpine
@@ -228,8 +253,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-
-
+    networks:
+        - microservices-net
 
   # ----------------------------------------------------------------
   # Kafka
@@ -260,6 +285,8 @@ services:
       # - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
     volumes:
       - kafka_data:/bitnami/kafka
+    networks:
+        - microservices-net
 
   kafka-ui:
     image: provectuslabs/kafka-ui:0.3.2
@@ -270,6 +297,8 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092
       DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+        - microservices-net
     # depends_on:
     #   kafka-broker:
     #     condition: service_healthy   # добавь, если у kafka есть healthcheck
@@ -294,6 +323,9 @@ services:
     networks:
       - microservices-net
     restart: unless-stopped
+    depends_on:
+      - discovery
+    
 
   # ----------------------------------------------------------------
   # Loki — сбор и хранение логов

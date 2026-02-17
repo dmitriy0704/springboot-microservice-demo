@@ -5,34 +5,29 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
   # ── Сбор метрик с Eureka-registered Spring Boot приложений ──
-  - job_name: 'spring-boot-apps'
+  - job_name: 'eureka-discovery'
     metrics_path: '/actuator/prometheus'          # стандартный путь Micrometer
     scrape_interval: 15s
     eureka_sd_configs:
-      - server: http://eureka-server:8761/eureka   # адрес твоего Eureka
+      - server: http://discovery:8761/eureka
         follow_redirects: true
         enable_http2: true
     # Очень важная часть — relabeling, чтобы Prometheus знал, куда именно стучаться
     relabel_configs:
-      # Берём hostname и port из метаданных Eureka
-      - source_labels: [__meta_eureka_app_instance_hostname, __meta_eureka_app_instance_port]
-        separator: ':'
-        target_label: __address__
+      - source_labels: [__meta_eureka_app_instance_metadata_prometheus_scrape]
+        action: keep
+        regex: true
 
-      # (опционально) можно добавить метки для удобства в Grafana
+      # Берём путь из метаданных (можно убрать, если везде /actuator/prometheus)
+      - source_labels: [__meta_eureka_app_instance_metadata_prometheus_path]
+        target_label: __metrics_path__
+        regex: (.+)
+
+      # Красивый job label = имя приложения в Eureka
       - source_labels: [__meta_eureka_app_name]
-        target_label: application
+        target_label: job
+        replacement: ${1}
+
+      # instance = service-name:port
       - source_labels: [__meta_eureka_app_instance_id]
         target_label: instance
-      - source_labels: [__meta_eureka_app_instance_metadata_management_port]
-        target_label: __tmp_management_port   # если метрики на другом порту (редко)
-
-      # Только те приложения, у которых есть метрики (по имени или метке)
-      - source_labels: [__meta_eureka_app_name]
-        regex: '(user-service|order-service|payment-service)'   # подставь свои имена
-        action: keep
-
-      # Если метрики доступны только по management.server.port — используй его
-      # - source_labels: [__meta_eureka_app_instance_metadata_management_port]
-      #   target_label: __address__
-      #   replacement: '$1:$2'   # но обычно совпадает с server.port
